@@ -4,7 +4,10 @@ import openpyxl
 import matplotlib.pyplot as plt
 import matplotlib
 from matplotlib.widgets import RadioButtons
+from sklearn.linear_model import LinearRegression
 
+
+model = LinearRegression()
 matplotlib.rcParams['lines.linewidth'] = 2
 matplotlib.rcParams['lines.linestyle'] = '-'
 matplotlib.rcParams.update({'font.size': 7})
@@ -85,6 +88,11 @@ s5 = exlData.iloc[:, 4].values
 s6 = exlData.iloc[:, 5].values
 s7 = exlData.iloc[:, 6].values
 s8 = exlData.iloc[:, 7].values
+lr2 = exlData.iloc[2:5, 0:6].values
+lr = exlData.iloc[0:2, 0:6].values
+lr.add(exlData.iloc[11, 0:6].values)
+print(lr)
+print(exlData.iloc[11, 0:6].values)
 
 def click(label):
     ax.clear()
@@ -115,12 +123,27 @@ def click(label):
     elif label == "2024":
         ax.plot(x, s8, lw=2, color='mediumspringgreen')
         ax.set_title("2024", c='mediumspringgreen')
+    elif label == "Linear Regression SEAS1":
+        ax.plot(x, s8, lw=2, color='red')
+        ax.set_title("Linear Regression SEAS1", c='red')
+    elif label == "Linear Regression SEAS2":
+        mon = np.array([[1,1,1,1,1,1],[2,2,2,2,2,2],[3,3,3,3,3,3]])
+        ax.scatter(mon, lr2,color='gray')
+        ax.plot([mon.min(), mon.max()],[lr2.min(), lr2.max()], 'k--')
+        # ax.plot([['mar'], ['apr'], ['may']], y_pred, lw=2, color='red')
+        ax.set_title("Linear Regression SEAS2", c='red')
+    elif label == "Linear Regression SEAS3":
+        ax.plot(x, s8, lw=2, color='red')
+        ax.set_title("Linear Regression SEAS3", c='red')
+    elif label == "Linear Regression SEAS4":
+        ax.plot(x, s8, lw=2, color='red')
+        ax.set_title("Linear Regression SEAS4", c='red')
     plt.draw()
 
 print(exlData)
 
 rax = plt.axes([0.02, 0.55, 0.20, 0.35], facecolor='white')
-radio = RadioButtons(rax, ('Все', '2017', '2018', '2019', '2020', '2021', '2022', '2023', '2024'), activecolor='k')
+radio = RadioButtons(rax, ('Все', '2017', '2018', '2019', '2020', '2021', '2022', '2023', '2024', 'Linear Regression SEAS1', 'Linear Regression SEAS2', 'Linear Regression SEAS3', 'Linear Regression SEAS4'), activecolor='k')
 plt.title(r'Доход магазинчкика')
 
 plt.figtext(0.93, 0.65, '2024', size=12, c='mediumspringgreen')
