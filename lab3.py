@@ -5,9 +5,11 @@ import matplotlib.pyplot as plt
 import matplotlib
 from matplotlib.widgets import RadioButtons
 from sklearn.linear_model import LinearRegression
+from matplotlib.artist import Artist
+import seaborn as sns
 
 
-model = LinearRegression()
+
 matplotlib.rcParams['lines.linewidth'] = 2
 matplotlib.rcParams['lines.linestyle'] = '-'
 matplotlib.rcParams.update({'font.size': 7})
@@ -63,6 +65,9 @@ for khk in range(0,12):
     exlData.iloc[:, 6].values[month] = res
     month += 1
 
+jj = 2000
+jj2 = 3000
+
 month = 0
 for khk in range(0,12):
     middleX = (2017 + 2018 + 2019 + 2020 + 2021 + 2022 + 2023) / 7
@@ -80,6 +85,8 @@ for khk in range(0,12):
     exlData.iloc[:, 7].values[month] = res
     month += 1
 
+txt1,txt2,txt3 = 'a','a','a'
+
 s1 = exlData.iloc[:, 0].values
 s2 = exlData.iloc[:, 1].values
 s3 = exlData.iloc[:, 2].values
@@ -89,55 +96,110 @@ s6 = exlData.iloc[:, 5].values
 s7 = exlData.iloc[:, 6].values
 s8 = exlData.iloc[:, 7].values
 lr2 = exlData.iloc[2:5, 0:6].values
-lr = exlData.iloc[0:2, 0:6].values
-lr.add(exlData.iloc[11, 0:6].values)
-print(lr)
-print(exlData.iloc[11, 0:6].values)
+lr3 = exlData.iloc[6:9, 0:6].values
+lr4 = exlData.iloc[7:10, 0:6].values
+lr = np.array([exlData.iloc[11, 0:6].values, exlData.iloc[0, 0:6].values, exlData.iloc[1, 0:6].values])
+
+model = LinearRegression()
+
+def dltText():
+    if txt1 != 'a':
+        try:
+            Artist.remove(txt1)
+            Artist.remove(txt2)
+            Artist.remove(txt3)
+        except:
+            return
+
+def coef(x,y):
+    n = np.size(x)
+    mean_x, mean_y = np.mean(x), np.mean(y)
+    SS_xy = np.sum(y*x - n*mean_y*mean_x)
+    SS_xx = np.sum(x*x - n*mean_x*mean_x)
+    b_1 = SS_xy / SS_xx
+    b_0 = mean_y - b_1*mean_x
+    return (b_0, b_1)
+
+def plot_progression_line(x, y, b, label):
+    global txt1,txt2,txt3
+    txt1,txt2,txt3 = 'a','a','a'
+    model.fit(x,y)
+    r_sq = model.score(x,y)
+    y_pred = b[0] + b[1] * x
+    txt1 = plt.figtext(0.01, 0.50, ('coefficient of determination: ',r_sq), size=9, c='gray')
+    txt2 = plt.figtext(0.01, 0.04, ('intercept:', model.intercept_), size=9, c='gray')
+    txt3 = plt.figtext(0.01, 0.15, ('slope:', model.coef_), size=7, c='gray')
+    ax.scatter(x, y, color='gray')
+    ax.plot(x, y_pred, 'k--')
+
 
 def click(label):
     ax.clear()
     if label == "2017":
+        dltText()
         ax.plot(x, s1, lw=2, color='dodgerblue')
         ax.set_title("2017", c='dodgerblue')
     elif label == "Все":
+        dltText()
         ax.set_title("2017-2023")
         ax.plot(exlData)
     elif label == "2018":
+        dltText()
         ax.plot(x, s2, lw=2, color='firebrick')
         ax.set_title("2018", c='firebrick')
     elif label == "2019":
+        dltText()
         ax.plot(x, s3, lw=2, color='mediumpurple')
         ax.set_title("2019", c='mediumpurple')
     elif label == "2020":
+        dltText()
         ax.plot(x, s4, lw=2, color='seagreen')
         ax.set_title("2020", c='seagreen')
     elif label == "2021":
+        dltText()
         ax.plot(x, s5, lw=2, color='coral')
         ax.set_title("2021", c='coral')
     elif label == "2022":
+        dltText()
         ax.plot(x, s6, lw=2, color='lightpink')
         ax.set_title("2022", c='lightpink')
     elif label == "2023":
+        dltText()
         ax.plot(x, s7, lw=2, color='aqua')
         ax.set_title("2023", c='aqua')
     elif label == "2024":
+        dltText()
         ax.plot(x, s8, lw=2, color='mediumspringgreen')
         ax.set_title("2024", c='mediumspringgreen')
+
     elif label == "Linear Regression SEAS1":
-        ax.plot(x, s8, lw=2, color='red')
-        ax.set_title("Linear Regression SEAS1", c='red')
+        mon = np.array([[1, 1, 1, 1, 1, 1], [2, 2, 2, 2, 2, 2], [3, 3, 3, 3, 3, 3]])
+        dltText()
+        b = coef(mon, lr)
+        plot_progression_line(mon,lr+jj,b,label)
+        ax.set_title(label, c='red')
+        ax.set_xlabel('Декабрь(1), Январь(2), Февраль(3)')
     elif label == "Linear Regression SEAS2":
-        mon = np.array([[1,1,1,1,1,1],[2,2,2,2,2,2],[3,3,3,3,3,3]])
-        ax.scatter(mon, lr2,color='gray')
-        ax.plot([mon.min(), mon.max()],[lr2.min(), lr2.max()], 'k--')
-        # ax.plot([['mar'], ['apr'], ['may']], y_pred, lw=2, color='red')
-        ax.set_title("Linear Regression SEAS2", c='red')
+        mon = np.array([[1, 1, 1, 1, 1, 1], [2, 2, 2, 2, 2, 2], [3, 3, 3, 3, 3, 3]])
+        dltText()
+        b = coef(mon, lr2)
+        plot_progression_line(mon,lr2,b, label)
+        ax.set_title(label, c='red')
+        ax.set_xlabel('Март(1), Апрель(2), Май(3)')
     elif label == "Linear Regression SEAS3":
-        ax.plot(x, s8, lw=2, color='red')
-        ax.set_title("Linear Regression SEAS3", c='red')
+        mon = np.array([[1, 1, 1, 1, 1, 1], [2, 2, 2, 2, 2, 2], [3, 3, 3, 3, 3, 3]])
+        dltText()
+        b = coef(mon, lr3)
+        plot_progression_line(mon,lr3,b, label)
+        ax.set_title(label, c='red')
+        ax.set_xlabel('Июнь(1), Июль(2), Август(3)')
     elif label == "Linear Regression SEAS4":
-        ax.plot(x, s8, lw=2, color='red')
-        ax.set_title("Linear Regression SEAS4", c='red')
+        mon = np.array([[1, 1, 1, 1, 1, 1], [2, 2, 2, 2, 2, 2], [3, 3, 3, 3, 3, 3]])
+        dltText()
+        b = coef(mon, lr4)
+        plot_progression_line(mon, lr4+jj2, b, label)
+        ax.set_title(label, c='red')
+        ax.set_xlabel('Сентябрь(1), Октябрь(2), Ноябрь(3)')
     plt.draw()
 
 print(exlData)
