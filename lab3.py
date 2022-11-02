@@ -6,8 +6,10 @@ import matplotlib
 from matplotlib.widgets import RadioButtons
 from sklearn.linear_model import LinearRegression
 from matplotlib.artist import Artist
+import seaborn as sns
 
 
+# Параметры плота и графиков
 
 matplotlib.rcParams['lines.linewidth'] = 2
 matplotlib.rcParams['lines.linestyle'] = '-'
@@ -16,10 +18,14 @@ plt.style.use('bmh')
 pd.set_option('display.max_columns', 20)
 pd.set_option('display.width', 2000)
 
+# Импорт эксель, создание дата фрейма
+
 exl = pd.read_excel('sheetEmpty.xlsx',index_col=0, na_filter=1)
 fig, ax = plt.subplots(1, figsize=(13,7))
 plt.subplots_adjust(left=0.3)
 exlData = pd.DataFrame(exl)
+
+# x - координата
 
 x = ('январь',
     'февраль',
@@ -35,8 +41,10 @@ x = ('январь',
     'декабрь'
             )
 
+# Na -> 0
 exlData = exlData.fillna(0)
 
+# Заполнение пропусков
 for year in range(0,6):
     i = 0
     for na in exlData.iloc[:, year].values:
@@ -49,11 +57,12 @@ for year in range(0,6):
             exlData.iloc[:, year].values[i] = na
         i += 1
 
+# Предсказание 2023 и 2024
 month = 0
 for khk in range(0,12):
-    middleX = (2017 + 2018 + 2019 + 2020 + 2021 + 2022) / 6
+    middleX = (2017 + 2018 + 2019 + 2020 + 2021 + 2022) / 6 # среднее годов
     middleY = (exlData.iloc[month, :].values[0] + exlData.iloc[month, :].values[1] + exlData.iloc[month, :].values[2] + \
-    exlData.iloc[month, :].values[3] + exlData.iloc[month, :].values[4] + exlData.iloc[month, :].values[5]) / 6
+    exlData.iloc[month, :].values[3] + exlData.iloc[month, :].values[4] + exlData.iloc[month, :].values[5]) / 6 # среднее значений
     b = (((2017 - middleX) * (exlData.iloc[month, :].values[0] - middleY)) + ((2018 - middleX) * (exlData.iloc[month, :].values[1] - middleY)) + \
          ((2019 - middleX) * (exlData.iloc[month, :].values[2] - middleY)) +((2020 - middleX) * (exlData.iloc[month, :].values[3] - middleY)) + \
          ((2021 - middleX) * (exlData.iloc[month, :].values[4] - middleY) +(2022 - middleX) * (exlData.iloc[month, :].values[5] - middleY)))  \
@@ -63,15 +72,16 @@ for khk in range(0,12):
     res = round(res,0)
     exlData.iloc[:, 6].values[month] = res
     month += 1
+    # y = a + bx
 
 jj = 2000
 jj2 = 3000
 
 month = 0
 for khk in range(0,12):
-    middleX = (2017 + 2018 + 2019 + 2020 + 2021 + 2022 + 2023) / 7
+    middleX = (2017 + 2018 + 2019 + 2020 + 2021 + 2022 + 2023) / 7 # среднее годов
     middleY = (exlData.iloc[month, :].values[0] + exlData.iloc[month, :].values[1] + exlData.iloc[month, :].values[2] + \
-    exlData.iloc[month, :].values[3] + exlData.iloc[month, :].values[4] + exlData.iloc[month, :].values[5] + exlData.iloc[month, :].values[6])/ 7
+    exlData.iloc[month, :].values[3] + exlData.iloc[month, :].values[4] + exlData.iloc[month, :].values[5] + exlData.iloc[month, :].values[6])/ 7 # среднее значений
     b = (((2017 - middleX) * (exlData.iloc[month, :].values[0] - middleY)) + ((2018 - middleX) * (exlData.iloc[month, :].values[1] - middleY)) + \
          ((2019 - middleX) * (exlData.iloc[month, :].values[2] - middleY)) + ((2020 - middleX) * (exlData.iloc[month, :].values[3] - middleY)) + \
          ((2021 - middleX) * (exlData.iloc[month, :].values[4] - middleY) + (2022 - middleX) * (exlData.iloc[month, :].values[5] - middleY)) + \
@@ -83,9 +93,11 @@ for khk in range(0,12):
     res = round(res,0)
     exlData.iloc[:, 7].values[month] = res
     month += 1
+    # y = a + bx
 
 txt1,txt2,txt3 = 'a','a','a'
 
+# Создание Y координат для линейной регрессии и графиков
 s1 = exlData.iloc[:, 0].values
 s2 = exlData.iloc[:, 1].values
 s3 = exlData.iloc[:, 2].values
@@ -101,6 +113,7 @@ lr = np.array([exlData.iloc[11, 0:6].values, exlData.iloc[0, 0:6].values, exlDat
 
 model = LinearRegression()
 
+# очистка вывода инфы на регрессии
 def dltText():
     if txt1 != 'a':
         try:
@@ -110,6 +123,7 @@ def dltText():
         except:
             return
 
+# коеффициент оценки
 def coef(x,y):
     n = np.size(x)
     mean_x, mean_y = np.mean(x), np.mean(y)
@@ -119,6 +133,7 @@ def coef(x,y):
     b_0 = mean_y - b_1*mean_x
     return (b_0, b_1)
 
+# высчитывание предсказания значений, отрисовка регрессии
 def plot_progression_line(x, y, b, label):
     global txt1,txt2,txt3
     txt1,txt2,txt3 = 'a','a','a'
@@ -131,7 +146,7 @@ def plot_progression_line(x, y, b, label):
     ax.scatter(x, y, color='gray')
     ax.plot(x, y_pred, 'k--')
 
-
+# Отрисовка плото и графиков по нажатию на кнопки
 def click(label):
     ax.clear()
     if label == "2017":
@@ -203,10 +218,12 @@ def click(label):
 
 print(exlData)
 
+# кнопочки
 rax = plt.axes([0.02, 0.55, 0.20, 0.35], facecolor='white')
 radio = RadioButtons(rax, ('Все', '2017', '2018', '2019', '2020', '2021', '2022', '2023', '2024', 'Linear Regression SEAS1', 'Linear Regression SEAS2', 'Linear Regression SEAS3', 'Linear Regression SEAS4'), activecolor='k')
 plt.title(r'Доход магазинчкика')
 
+# текст для различения графиков на общем плоте
 plt.figtext(0.93, 0.65, '2024', size=12, c='mediumspringgreen')
 plt.figtext(0.93, 0.60, '2023', size=12, c='aqua')
 plt.figtext(0.93, 0.55, '2022', size=12, c='lightpink')
@@ -216,6 +233,7 @@ plt.figtext(0.93, 0.40, '2019', size=12, c='mediumpurple')
 plt.figtext(0.93, 0.35, '2018', size=12, c='firebrick')
 plt.figtext(0.93, 0.30, '2017', size=12, c='dodgerblue')
 
+# начальный запуск
 ax.plot(exlData)
 ax.set_title("2017-2024")
 radio.on_clicked(click)
