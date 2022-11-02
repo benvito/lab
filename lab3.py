@@ -6,7 +6,6 @@ import matplotlib
 from matplotlib.widgets import RadioButtons
 from sklearn.linear_model import LinearRegression
 from matplotlib.artist import Artist
-import seaborn as sns
 
 
 
